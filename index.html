@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
+        <script src="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+
+    <title>Hello, world!</title>
+</head>
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<canvas id="canvas"></canvas>
+
+<script>
+
+
+    function getCurrentPageMousePosition(e) {
+        return {
+            x: e.pageX,
+            y: e.pageY
+        };
+    }
+
+
+    function getCurrentCanvasMousePosition(e, canvasElem) {
+        if (e.originalEvent.changedTouches != null && canvasElem != null) {
+            var rect = canvasElem.getBoundingClientRect();
+            return {
+                x: e.originalEvent.changedTouches[0].clientX - rect.left,
+                y: e.originalEvent.changedTouches[0].clientY - rect.top
+            };
+        } else if (e.clientX || e.clientX === 0 && canvasElem != null) {
+            var rect = canvasElem.getBoundingClientRect();
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        } else {
+            console.log("Error: Invalid state");
+        }
+    }
+
+
+    $("#" + "canvas").mousedown(function (e) {
+        e.preventDefault();
+
+        var canvasElem = $("#" + "canvas")[0];
+        const pageMousePosition = getCurrentPageMousePosition(e);
+        const canvasMousePosition = getCurrentCanvasMousePosition(e, canvasElem);
+        console.log(pageMousePosition)
+        console.log(canvasMousePosition)
+
+        //canvasMouseDownEvent(pageMousePosition, canvasMousePosition);
+    });
+
+    function tomdrawlin() {
+        var c = document.getElementById("myCanvas");
+        var ctx = c.getContext("2d");
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(300, 150);
+        ctx.stroke();
+    }
+
+
+var imgw = 100;
+var imgh = 100;
+var imgsrc = "image8-2.webp";
+
+function getPixels() {
+    var img = new Image();
+    img.src = imgsrc;
+    var canvas = document.getElementById('canvas');
+    var context = canvas.getContext('2d');
+    context.drawImage(img, 0, 0, imgw, imgh);
+    return context.getImageData(0, 0, imgw, imgh).data;
+}
+
+function pointArrayToSpline() {
+
+}
+
+function toBlackAndWhite(imageData) {
+    var output = []
+    for (i = 0; i < imgh; i++) {
+        for (j = 0; j < imgw; j++) {
+            var index = ( i * (imgw * 4) ) + (j * 4)
+            var val = ((imageData[index] + imageData[index+1] + imageData[index+2])/3.0)
+            output.push(val)
+        }
+    }
+    return output
+}
+
+function main() {
+    var p = getPixels()
+
+    for (i = 0; i < imgh; i++) {
+        for (j = 0; j < imgw; j++) {
+
+        }
+    }
+    console.log(p.length)
+}
+
+
+</script>
+<style>
+.ct-chart {
+    width: 100px;
+    height: 100px;
+
+}
+</style>
+<body>
+<div class="ct-chart ct-golden-section" id="chart1" width="100"></div>
+<div class="ct-chart ct-golden-section" id="chart2" width="100"></div>
+
+<script>
+    // Initialize a Line chart in the container with the ID chart1
+    new Chartist.Line('#chart1', {
+        labels: [1, 2, 3, 4],
+        series: [[100, 120, 180, 200]]
+    });
+
+    // Initialize a Line chart in the container with the ID chart2
+    new Chartist.Bar('#chart2', {
+        labels: [1, 2, 3, 4],
+        series: [[5, 2, 8, 3]]
+    });
+</script>
+
+<h1>Hello, world!</h1>
+<img src="image8-2.webp" width="200" height="200" onload="main()"/>
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+
+
+
+</body>
+</html>
