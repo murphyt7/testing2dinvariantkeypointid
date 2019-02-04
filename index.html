@@ -21,12 +21,20 @@
 <canvas id="canvas"></canvas>
 
 <script>
+
+var g_globalState = {
+    canvasClickLocation: {x: 50, y: 50},
+
+};
+
 var g_p;
-
-
 var imgw = 100;
 var imgh = 100;
 var imgsrc = "image8-2.webp";
+
+
+
+
 
 function getCurrentPageMousePosition(e) {
     return {
@@ -54,13 +62,7 @@ function getCurrentCanvasMousePosition(e, canvasElem) {
     }
 }
 
-function plotImagePoints(yval) {
-    var output = []
-    for (i = 0 ; i < imgw; i++) {
-        output.push(g_p[yval*imgw + i])
-    }
-    plotPoints( output )
-}
+
 
 $("#" + "canvas").mousedown(function (e) {
     e.preventDefault();
@@ -68,11 +70,11 @@ $("#" + "canvas").mousedown(function (e) {
     var canvasElem = $("#" + "canvas")[0];
     const pageMousePosition = getCurrentPageMousePosition(e);
     const canvasMousePosition = getCurrentCanvasMousePosition(e, canvasElem);
-    console.log(pageMousePosition)
-    console.log(canvasMousePosition)
+    console.log(pageMousePosition);
+    console.log(canvasMousePosition);
 
-    //canvasMouseDownEvent(pageMousePosition, canvasMousePosition);
-    plotImagePoints(canvasMousePosition.y)
+    g_globalState.canvasClickLocation = canvasMousePosition;
+    draw()
 });
 
 function tomdrawlin() {
@@ -112,27 +114,67 @@ function toBlackAndWhite(imageData) {
 
 function main() {
     g_p = toBlackAndWhite(getPixels())
+    draw();
+}
 
-    for (i = 0; i < imgh; i++) {
-        for (j = 0; j < imgw; j++) {
+function plotPoints(inputArr, yval, xval, leftVal, rightVal){
+    labels = [];
+    nulllist = [];
+    nulllistr = [];
+    nulllistl = [];
 
+    for (i = 0; i < inputArr.length; i++)
+    {
+        labels.push(i);
+
+        nulllist.push( (i != xval)? null : inputArr[xval] );
+        nulllistr.push( (i != rightVal)? null : inputArr[rightVal] );
+        nulllistl.push( (i != leftVal)? null : inputArr[leftVal] );
+    }
+    console.log(xval);
+    // Initialize a Line chart in the container with the ID chart1
+    new Chartist.Line('#chart1', {
+        labels: labels,
+        series: [ inputArr, nulllist, nulllistr, nulllistl ]
+    });
+}
+
+function findRightPointOfAnchor(output, xval) {
+    var deltaTotal = 0;
+    for (i = xval + 1; i < output.length; i++) {
+        deltaTotal += Math.abs( output[i+1] - output[i] );
+        console.log("deltaTotal: " + deltaTotal);
+        if (deltaTotal > 200){
+            return i;
         }
     }
 }
 
-function plotPoints(inputArr){
-    labels = []
-    for (i = 0; i < inputArr.length; i++)
-    {
-               labels.push(i)
+function findLeftPointOfAnchor(output, xval) {
+    var deltaTotal = 0;
+    for (i = 0; i < xval; i++) {
+        deltaTotal += Math.abs( output[i+1] - output[i] );
+        console.log("deltaTotal: " + deltaTotal);
+        if (deltaTotal > 200){
+            return i;
+        }
     }
-    // Initialize a Line chart in the container with the ID chart1
-    new Chartist.Line('#chart1', {
-        labels: labels,
-        series: [inputArr]
-    });
 }
 
+function plotImagePoints(yval, xval) {
+    var output = []
+    for (i = 0 ; i < imgw; i++) {
+        output.push(g_p[yval*imgw + i])
+    }
+    rightVal = findRightPointOfAnchor(output, xval);
+    leftVal = findLeftPointOfAnchor(output, xval);
+
+    plotPoints( output, yval, xval, leftVal, rightVal )
+}
+
+function draw() {
+    plotImagePoints(g_globalState.canvasClickLocation.y, g_globalState.canvasClickLocation.x)
+}
 
 </script>
 <style>
@@ -140,6 +182,10 @@ function plotPoints(inputArr){
     width: 600px;
     height: 400px;
 
+
+}
+.ct-series-b .ct-point{
+    stroke: blue !important;
 }
 </style>
 <body>
