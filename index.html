@@ -31,7 +31,8 @@ var g_p;
 var imgw = 100;
 var imgh = 100;
 var imgsrc = "image8-2.webp";
-
+var g_img = new Image();
+g_img.src = imgsrc;
 
 
 
@@ -87,13 +88,11 @@ function tomdrawlin() {
 }
 
 
-function getPixels() {
-    var img = new Image();
-    img.src = imgsrc;
+function getPixels(image, width, height) {
     var canvas = document.getElementById('canvas');
     var context = canvas.getContext('2d');
-    context.drawImage(img, 0, 0, imgw, imgh);
-    return context.getImageData(0, 0, imgw, imgh).data;
+    context.drawImage(image, 0, 0, width, height);
+    return context.getImageData(0, 0, width, height).data;
 }
 
 function pointArrayToSpline() {
@@ -113,7 +112,7 @@ function toBlackAndWhite(imageData) {
 }
 
 function main() {
-    g_p = toBlackAndWhite(getPixels())
+    //g_p = toBlackAndWhite(getPixels())
     draw();
 }
 
@@ -173,7 +172,12 @@ function plotImagePoints(yval, xval) {
 }
 
 function draw() {
+    var d = new Date();
+    var n = d.getTime();
+    var delta =  Math.round(100*(( n % 30000)/30000) );
+    g_p = toBlackAndWhite(getPixels(g_img, imgw + delta , imgh));
     plotImagePoints(g_globalState.canvasClickLocation.y, g_globalState.canvasClickLocation.x)
+    setTimeout(draw, 0)
 }
 
 </script>
