@@ -44,6 +44,9 @@ function getCurrentPageMousePosition(e) {
     };
 }
 
+function getTanFromDegrees(degrees) {
+    return Math.tan(degrees * Math.PI/180);
+}
 
 function inner_bilinear_interp(q00, q10, q01, q11, x, y) {
     var un_x = 1.0 - x; var un_y = 1.0 - y;
