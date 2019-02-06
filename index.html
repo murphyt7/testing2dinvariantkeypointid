@@ -45,6 +45,20 @@ function getCurrentPageMousePosition(e) {
 }
 
 
+function inner_bilinear_interp(q00, q10, q01, q11, x, y) {
+    var un_x = 1.0 - x; var un_y = 1.0 - y;
+    return (q00 * un_x * un_y + q10 * x * un_y + q01 * un_x * y + q11 * x * y);
+}
+
+function bilinearInterp(image, xVal, yVal) {
+    var x1 = Math.floor(xVal);
+    var x2 = Math.floor(xVal) + 1;
+    var y1 = Math.floor(xVal);
+    var y2 = Math.floor(xVal) + 1;
+    return inner_bilinear_interp(image[y1][x1], image[y2][x1], image[y1][x2], image[y2][x2], xVal - x1, yVal - y1)
+}
+
+
 function getCurrentCanvasMousePosition(e, canvasElem) {
     if (e.originalEvent.changedTouches != null && canvasElem != null) {
         var rect = canvasElem.getBoundingClientRect();
