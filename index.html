@@ -172,8 +172,8 @@
     function bilinearInterp(image, xVal, yVal) {
         var x1 = Math.floor(xVal);
         var x2 = Math.floor(xVal) + 1;
-        var y1 = Math.floor(xVal);
-        var y2 = Math.floor(xVal) + 1;
+        var y1 = Math.floor(yVal);
+        var y2 = Math.floor(yVal) + 1;
         return inner_bilinear_interp(image[y1][x1], image[y2][x1], image[y1][x2], image[y2][x2], xVal - x1, yVal - y1)
     }
 
