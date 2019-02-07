@@ -5,8 +5,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-        <link rel="stylesheet" href="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
-        <script src="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
+    <script src="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
@@ -22,192 +22,280 @@
 
 <script>
 
-var g_globalState = {
-    canvasClickLocation: {x: 50, y: 50},
+    var g_globalState = {
+        canvasClickLocation: {x: 50, y: 50},
 
-};
-
-var g_p;
-var imgw = 100;
-var imgh = 100;
-var imgsrc = "image8-2.webp";
-var g_img = new Image();
-g_img.src = imgsrc;
-
-
-
-
-function getCurrentPageMousePosition(e) {
-    return {
-        x: e.pageX,
-        y: e.pageY
     };
-}
 
-function getTanFromDegrees(degrees) {
-    return Math.tan(degrees * Math.PI/180);
-}
-
-function inner_bilinear_interp(q00, q10, q01, q11, x, y) {
-    var un_x = 1.0 - x; var un_y = 1.0 - y;
-    return (q00 * un_x * un_y + q10 * x * un_y + q01 * un_x * y + q11 * x * y);
-}
-
-function bilinearInterp(image, xVal, yVal) {
-    var x1 = Math.floor(xVal);
-    var x2 = Math.floor(xVal) + 1;
-    var y1 = Math.floor(xVal);
-    var y2 = Math.floor(xVal) + 1;
-    return inner_bilinear_interp(image[y1][x1], image[y2][x1], image[y1][x2], image[y2][x2], xVal - x1, yVal - y1)
-}
+    var g_p;
+    var imgw_base = 100;
+    var imgw = 100;
+    var imgh = 100;
+    var imgsrc = "image8-2.jpg";
+    var g_img = new Image();
+    g_img.src = imgsrc;
 
 
-function getCurrentCanvasMousePosition(e, canvasElem) {
-    if (e.originalEvent.changedTouches != null && canvasElem != null) {
-        var rect = canvasElem.getBoundingClientRect();
+
+
+    function getCurrentPageMousePosition(e) {
         return {
-            x: e.originalEvent.changedTouches[0].clientX - rect.left,
-            y: e.originalEvent.changedTouches[0].clientY - rect.top
+            x: e.pageX,
+            y: e.pageY
         };
-    } else if (e.clientX || e.clientX === 0 && canvasElem != null) {
-        var rect = canvasElem.getBoundingClientRect();
-        return {
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top
-        };
-    } else {
-        console.log("Error: Invalid state");
     }
-}
 
 
-
-$("#" + "canvas").mousedown(function (e) {
-    e.preventDefault();
-
-    var canvasElem = $("#" + "canvas")[0];
-    const pageMousePosition = getCurrentPageMousePosition(e);
-    const canvasMousePosition = getCurrentCanvasMousePosition(e, canvasElem);
-    console.log(pageMousePosition);
-    console.log(canvasMousePosition);
-
-    g_globalState.canvasClickLocation = canvasMousePosition;
-    draw()
-});
-
-function tomdrawlin() {
-    var c = document.getElementById("myCanvas");
-    var ctx = c.getContext("2d");
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(300, 150);
-    ctx.stroke();
-}
-
-
-function getPixels(image, width, height) {
-    var canvas = document.getElementById('canvas');
-    var context = canvas.getContext('2d');
-    context.drawImage(image, 0, 0, width, height);
-    return context.getImageData(0, 0, width, height).data;
-}
-
-function pointArrayToSpline() {
-
-}
-
-function toBlackAndWhite(imageData) {
-    var output = []
-    for (i = 0; i < imgh; i++) {
-        for (j = 0; j < imgw; j++) {
-            var index = ( i * (imgw * 4) ) + (j * 4)
-            var val = ((imageData[index] + imageData[index+1] + imageData[index+2])/3.0)
-            output.push(val)
+    function getCurrentCanvasMousePosition(e, canvasElem) {
+        if (e.originalEvent.changedTouches != null && canvasElem != null) {
+            var rect = canvasElem.getBoundingClientRect();
+            return {
+                x: e.originalEvent.changedTouches[0].clientX - rect.left,
+                y: e.originalEvent.changedTouches[0].clientY - rect.top
+            };
+        } else if (e.clientX || e.clientX === 0 && canvasElem != null) {
+            var rect = canvasElem.getBoundingClientRect();
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        } else {
+            console.log("Error: Invalid state");
         }
     }
-    return output
-}
 
-function main() {
-    //g_p = toBlackAndWhite(getPixels())
-    draw();
-}
 
-function plotPoints(inputArr, yval, xval, leftVal, rightVal){
-    labels = [];
-    nulllist = [];
-    nulllistr = [];
-    nulllistl = [];
 
-    for (i = 0; i < inputArr.length; i++)
-    {
-        labels.push(i);
+    $("#" + "canvas").mousedown(function (e) {
+        e.preventDefault();
 
-        nulllist.push( (i != xval)? null : inputArr[xval] );
-        nulllistr.push( (i != rightVal)? null : inputArr[rightVal] );
-        nulllistl.push( (i != leftVal)? null : inputArr[leftVal] );
-    }
-    console.log(xval);
-    // Initialize a Line chart in the container with the ID chart1
-    new Chartist.Line('#chart1', {
-        labels: labels,
-        series: [ inputArr, nulllist, nulllistr, nulllistl ]
+        var canvasElem = $("#" + "canvas")[0];
+        const pageMousePosition = getCurrentPageMousePosition(e);
+        const canvasMousePosition = getCurrentCanvasMousePosition(e, canvasElem);
+        console.log(pageMousePosition);
+        console.log(canvasMousePosition);
+
+        g_globalState.canvasClickLocation = {x: canvasMousePosition.x/imgw, y: canvasMousePosition.y/imgh};
+        draw()
     });
-}
 
-function findRightPointOfAnchor(output, xval) {
-    var deltaTotal = 0;
-    for (i = xval + 1; i < output.length; i++) {
-        deltaTotal += Math.abs( output[i+1] - output[i] );
-        console.log("deltaTotal: " + deltaTotal);
-        if (deltaTotal > 200){
-            return i;
+    function tomdrawlin() {
+        var c = document.getElementById("myCanvas");
+        var ctx = c.getContext("2d");
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(300, 150);
+        ctx.stroke();
+    }
+
+
+    function getPixels(image, width, height) {
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+        context.drawImage(image, 0, 0, width, height);
+        return context.getImageData(0, 0, width, height).data;
+    }
+
+    function pointArrayToSpline() {
+
+    }
+
+    function toBlackAndWhite(imageData) {
+        var output = []
+
+        for (i = 0; i < imgh; i++) {
+            var arr = []
+            for (j = 0; j < imgw; j++) {
+                var index = ( i * (imgw * 4) ) + (j * 4)
+                var val = ((imageData[index] + imageData[index+1] + imageData[index+2])/3.0)
+                arr.push(val)
+            }
+            output.push(arr)
+        }
+        return output
+    }
+
+    function main() {
+        //g_p = toBlackAndWhite(getPixels())
+        draw();
+    }
+
+    function plotPoints(inputArr, yval, xval, leftVal, rightVal){
+        labels = [];
+        zvals = []
+        nulllist = [];
+        nulllistr = [];
+        nulllistl = [];
+        var i,j;
+
+        for (i = 0; i < inputArr[0].length; i++)
+        {
+            labels.push(i);
+            zvals.push(inputArr[0][i].z)
+
+            //nulllist.push( (i != xval)? null : inputArr[xval] );
+            //nulllistr.push( (i != rightVal)? null : inputArr[rightVal] );
+            //nulllistl.push( (i != leftVal)? null : inputArr[leftVal] );
+        }
+        for (j = 0; j < inputArr[1].length; j++) {
+            labels.push(i+ j);
+            zvals.push(inputArr[1][j].z)
+        }
+        console.log(xval);
+        // Initialize a Line chart in the container with the ID chart1
+        new Chartist.Line('#chart1', {
+            labels: labels,
+            series: [
+                zvals
+            //    nulllist,
+            //    nulllistr,
+            //    nulllistl
+            ]
+        });
+    }
+
+    function findRightPointOfAnchor(output) {
+        var deltaTotal = 0;
+        for (i = 0; i < output.length - 1; i++) {
+            deltaTotal += Math.abs( output[i+1].z - output[i].z );
+            if (deltaTotal > 200){
+                return output[i];
+            }
         }
     }
-}
 
-function findLeftPointOfAnchor(output, xval) {
-    var deltaTotal = 0;
-    for (i = 0; i < xval; i++) {
-        deltaTotal += Math.abs( output[i+1] - output[i] );
-        console.log("deltaTotal: " + deltaTotal);
-        if (deltaTotal > 200){
-            return i;
+    function inner_bilinear_interp(q00, q10, q01, q11, x, y) {
+        var un_x = 1.0 - x; var un_y = 1.0 - y;
+        return (q00 * un_x * un_y + q10 * x * un_y + q01 * un_x * y + q11 * x * y);
+    }
+
+    function bilinearInterp(image, xVal, yVal) {
+        var x1 = Math.floor(xVal);
+        var x2 = Math.floor(xVal) + 1;
+        var y1 = Math.floor(xVal);
+        var y2 = Math.floor(xVal) + 1;
+        return inner_bilinear_interp(image[y1][x1], image[y2][x1], image[y1][x2], image[y2][x2], xVal - x1, yVal - y1)
+    }
+
+    function getTanFromDegrees(degrees) {
+        return Math.tan(degrees * Math.PI/180);
+    }
+
+    function getCosFromDegrees(degrees) {
+        return Math.cos(degrees * Math.PI/180);
+    }
+
+    function getSinFromDegrees(degrees) {
+        return Math.sin(degrees * Math.PI/180);
+    }
+
+    function getDirectionPointsWithjump(xval, yval, xjump, yjump) {
+        var dx = xval;
+        var dy = yval;
+        var output = [];
+        var count = 0;
+        while(dx < imgw && dx > 0 && dy < imgh && dy > 0) {
+            if (count > 10) {
+                break;
+            }
+            output.push({x: dx, y: dy});
+            count++;
+            dx = dx + xjump;
+            dy = dy + yjump;
         }
+        return output;
     }
-}
 
-function plotImagePoints(yval, xval) {
-    var output = []
-    for (i = 0 ; i < imgw; i++) {
-        output.push(g_p[yval*imgw + i])
+    function getDirectionPoints(xval, yval, rot) {
+        var jumpH = 1;
+        var cosval = getCosFromDegrees(rot);
+        var sinval = getSinFromDegrees(rot);
+        return [
+            getDirectionPointsWithjump(xval + cosval, yval + sinval, cosval, sinval),
+            getDirectionPointsWithjump(xval, yval, -cosval, -sinval)
+            ]
     }
-    rightVal = findRightPointOfAnchor(output, xval);
-    leftVal = findLeftPointOfAnchor(output, xval);
+    
+    function getZValues(image, xval, yval, rot) {
+        var points = getDirectionPoints(xval, yval, rot);
+        var rightvals = [];
+        for (var i = 0; i < points[0].length; i++) {
+            rightvals.push( {
+                x: points[0][i].x,
+                y: points[0][i].y,
+                z: bilinearInterp(image, points[0][i].x, points[0][i].y)
+            } );
+        }
+        var leftvals = [];
+        for (var i = 0; i < points[1].length; i++) {
+            leftvals.push( {
+                x: points[1][i].x,
+                y: points[1][i].y,
+                z: bilinearInterp(image, points[1][i].x, points[1][i].y)
+            } );
+        }
+        return [rightvals, leftvals]
+    }
 
-    plotPoints( output, yval, xval, leftVal, rightVal )
-}
+    function drawPoint(interactiveCanvasContext, point, colour) {
+        interactiveCanvasContext.beginPath();
+        interactiveCanvasContext.strokeStyle = colour;
+        console.log(point.x + ":" + point.y)
+        interactiveCanvasContext.rect(point.x, point.y, 3, 3);
+        interactiveCanvasContext.closePath();
+        interactiveCanvasContext.stroke();
+    }
 
-function draw() {
-    var d = new Date();
-    var n = d.getTime();
-    var delta =  Math.round(100*(( n % 30000)/30000) );
-    g_p = toBlackAndWhite(getPixels(g_img, imgw + delta , imgh));
-    plotImagePoints(g_globalState.canvasClickLocation.y, g_globalState.canvasClickLocation.x)
-    setTimeout(draw, 0)
-}
+    function plotImagePoints(output, xval, yval, rightVal, leftVal) {
+
+        plotPoints( output, yval, xval, leftVal, rightVal )
+    }
+
+    function getPixelsInDirection() {
+
+    }
+
+    function draw() {
+        var c = document.getElementById("canvas");
+        var ctx = c.getContext("2d");
+        ctx.clearRect(0, 0, c.width, c.height)
+        var d = new Date();
+        var n = d.getTime();
+        var delta =  Math.round(100*(( n % 3000)/3000) );
+        //imgw = imgw_base + delta;
+        g_p = toBlackAndWhite(getPixels(g_img, imgw, imgh));
+        xval = g_globalState.canvasClickLocation.x*imgw
+        yval = g_globalState.canvasClickLocation.y*imgh
+        yval = Math.round(yval)
+        xval = Math.round(xval)
+
+        var rot = 10;
+        var zvals = getZValues(g_p, xval, yval, rot);
+
+        var rightVal = findRightPointOfAnchor(zvals[0]);
+        var leftVal = findRightPointOfAnchor(zvals[0]);
+
+        if (rightVal)
+            drawPoint(ctx, rightVal, "red")
+        if (leftVal)
+            drawPoint(ctx, leftVal, "red")
+
+        drawPoint(ctx, {x: xval, y: yval}, "blue")
+        plotImagePoints(zvals, xval, yval, rightVal, leftVal)
+        setTimeout(draw, 300)
+    }
 
 </script>
 <style>
-.ct-chart {
-    width: 600px;
-    height: 400px;
+    .ct-chart {
+        width: 600px;
+        height: 400px;
 
 
-}
-.ct-series-b .ct-point{
-    stroke: blue !important;
-}
+    }
+    .ct-series-b .ct-point{
+        stroke: blue !important;
+    }
 </style>
 <body>
 <div class="ct-chart ct-golden-section" id="chart1" width="100"></div>
@@ -218,7 +306,7 @@ function draw() {
 </script>
 
 <h1>Hello, world!</h1>
-<img src="image8-2.webp" width="200" height="200" onload="main()"/>
+<img src="image8-2.jpg" width="200" height="200" onload="main()"/>
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -229,3 +317,4 @@ function draw() {
 
 </body>
 </html>
+
