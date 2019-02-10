@@ -448,7 +448,7 @@ function nelderMead(f, x0, parameters) {
 
         newShape = scaleInDirection(shape, angle, scale);
         totalDiff = getTotalDiffSquaredOfPoints_matrix(newShape);
-        totalDiff += getTotalDiffSquaredOfAngles_matrix(newShape);
+        //totalDiff += getTotalDiffSquaredOfAngles_matrix(newShape);
         return totalDiff
     }
 
