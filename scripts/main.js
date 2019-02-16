@@ -732,9 +732,6 @@ function getHitPoints(img, imageData, m_xval, m_yval) {
         }
 
     }
-    if (shape.length > 3) {
-        console.log(getValuesToNormaliseScale1(to_matrix_shape(shape)));
-    }
     return shape;
 }
 
@@ -765,26 +762,26 @@ function draw() {
     var scaleRotation1 = 0;
     var scale1 = 1;
 
-    var scaleRotation2 = 0;
+    var scaleRotation2 = 45;
     var scale2 = 2;
 
     var c = document.getElementById("canvasImg1");
     var ctx = c.getContext("2d");
-    ctx.clearRect(0, 0, c.width, c.height)
+    ctx.clearRect(0, 0, c.width, c.height);
     drawImageWithTransformations(ctx, g_img, imgw, imgh, scale1, scaleRotation1);
 
     var c2 = document.getElementById("canvasImg2");
     var ctx2 = c2.getContext("2d");
-    ctx2.clearRect(0, 0, c2.width, c2.height)
+    ctx2.clearRect(0, 0, c2.width, c2.height);
     drawImageWithTransformations(ctx2, g_img, imgw, imgh, scale2, scaleRotation2);
 
     var cUI = document.getElementById("canvasImg1UI");
     var ctxUI = cUI.getContext("2d");
-    ctxUI.clearRect(0, 0, c2.width, c2.height)
+    ctxUI.clearRect(0, 0, c2.width, c2.height);
 
     var c2UI = document.getElementById("canvasImg2UI");
     var ctx2UI = c2UI.getContext("2d");
-    ctx2UI.clearRect(0, 0, c2.width, c2.height)
+    ctx2UI.clearRect(0, 0, c2.width, c2.height);
 
     var m_xval = g_globalState.canvasClickLocation.x*imgw;
     var m_yval = g_globalState.canvasClickLocation.y*imgh;
@@ -804,13 +801,34 @@ function draw() {
                     scaleRotation1, scale2, scaleRotation2, imgw, imgh);
 
     //var imageData = getPixels(img, imgw, imgh, 120, 2.5);
-    var img1HitPoints = getHitPoints(c2, ctx2.getImageData(0, 0, c2.width, c2.height).data,
+    var img2HitPoints = getHitPoints(c2, ctx2.getImageData(0, 0, c2.width, c2.height).data,
         transformedPoint.x, transformedPoint.y);
 
     //FIXME: we can't draw points on the canvas we test
     drawPoint(ctx2UI, transformedPoint, "blue");
 
-    for (let i = 0; i < img1HitPoints.length; i++) {
-        drawPoint(ctx2UI, img1HitPoints[i], "red")
+    for (let i = 0; i < img2HitPoints.length; i++) {
+        drawPoint(ctx2UI, img2HitPoints[i], "red")
+    }
+
+    var c1Result = document.getElementById("canvasImg1Result");
+    var ctx1Result = c1Result.getContext("2d");
+    ctx1Result.clearRect(0, 0, c2.width, c2.height)
+
+    var c2Result = document.getElementById("canvasImg2Result");
+    var ctx2Result = c2Result.getContext("2d");
+    ctx2Result.clearRect(0, 0, c2.width, c2.height)
+
+    if (img1HitPoints.length > 3) {
+        var normVals = getValuesToNormaliseScale1(to_matrix_shape(img1HitPoints));
+        drawImageWithTransformations(ctx1Result, c, imgw, imgh, normVals.scale, normVals.angle);
+    }
+
+    if (img2HitPoints.length > 3) {
+        var normVals = getValuesToNormaliseScale1(to_matrix_shape(img2HitPoints));
+        drawImageWithTransformations(ctx2Result, c2, imgw, imgh, normVals.scale, normVals.angle);
     }
 }
+
+
+

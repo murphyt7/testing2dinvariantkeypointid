@@ -32,20 +32,26 @@
     }
 </style>
 
-<div style="position: relative">
+<div style="position: relative" class="clearfix">
     <div class="canvasWrapper">
         <canvas id="canvasImg1" class="canvasInline" width="200" height="200"></canvas>
         <canvas id="canvasImg1UI" class="canvasInline" width="200" height="200"></canvas>
+    </div>
+    <div class="canvasWrapper">
+        <canvas id="canvasImg1Result" class="canvasInline" width="200" height="200"></canvas>
+        <canvas id="canvasImg1UIResult" class="canvasInline" width="200" height="200"></canvas>
     </div>
     <div class="canvasWrapper" width="200" height="200">
         <canvas id="canvasImg2" class="canvasInline" width="200" height="200"></canvas>
         <canvas id="canvasImg2UI" class="canvasInline" width="200" height="200"></canvas>
     </div>
+    <div class="canvasWrapper" width="200" height="200">
+        <canvas id="canvasImg2Result" class="canvasInline" width="200" height="200"></canvas>
+        <canvas id="canvasImg2UIResult" class="canvasInline" width="200" height="200"></canvas>
+    </div>
 </div>
 
-
-<div>imagemods</div>
-<canvas id="imageMods" width="200" height="200"></canvas>
+<canvas style="display: none" id="imageMods" width="200" height="200"></canvas>
 
 <style>
     .ct-chart {
@@ -59,9 +65,8 @@
 <body>
 <div class="ct-chart ct-golden-section" id="chart1" width="100"></div>
 
-<h1>Hello, world!</h1>
 <script src="scripts/main.js"></script>
-<img src="image8-2.jpg" width="200" height="200" onload="draw()"/>
+<img style="display: none" src="image8-2.jpg" width="200" height="200" onload="draw()"/>
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
