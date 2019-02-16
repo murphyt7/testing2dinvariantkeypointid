@@ -759,8 +759,8 @@ function getTransformedPoint(point, undoScale, undoScaleRotation, scale, scaleRo
 
 function draw() {
 
-    var scaleRotation1 = 0;
-    var scale1 = 1;
+    var scaleRotation1 = -45;
+    var scale1 = 2;
 
     var scaleRotation2 = 45;
     var scale2 = 2;
@@ -813,21 +813,31 @@ function draw() {
 
     var c1Result = document.getElementById("canvasImg1Result");
     var ctx1Result = c1Result.getContext("2d");
-    ctx1Result.clearRect(0, 0, c2.width, c2.height)
+    ctx1Result.clearRect(0, 0, c2.width, c2.height);
 
     var c2Result = document.getElementById("canvasImg2Result");
     var ctx2Result = c2Result.getContext("2d");
-    ctx2Result.clearRect(0, 0, c2.width, c2.height)
+    ctx2Result.clearRect(0, 0, c2.width, c2.height);
+
+    var canvasOverlay = document.getElementById("canvasOverlay");
+    var ctxCanvasOverlay = canvasOverlay.getContext("2d");
+    ctxCanvasOverlay.clearRect(0, 0, c2.width, c2.height);
 
     if (img1HitPoints.length > 3) {
         var normVals = getValuesToNormaliseScale1(to_matrix_shape(img1HitPoints));
         drawImageWithTransformations(ctx1Result, c, imgw, imgh, normVals.scale, normVals.angle);
+        ctxCanvasOverlay.globalAlpha = 0.5;
+        drawImageWithTransformations(ctxCanvasOverlay, c, imgw, imgh, normVals.scale, normVals.angle);
     }
 
     if (img2HitPoints.length > 3) {
         var normVals = getValuesToNormaliseScale1(to_matrix_shape(img2HitPoints));
         drawImageWithTransformations(ctx2Result, c2, imgw, imgh, normVals.scale, normVals.angle);
+        ctxCanvasOverlay.globalAlpha = 0.5;
+        drawImageWithTransformations(ctxCanvasOverlay, c2, imgw, imgh, normVals.scale, normVals.angle);
     }
+
+
 }
 
 
