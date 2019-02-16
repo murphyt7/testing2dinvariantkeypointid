@@ -504,7 +504,7 @@ function getCurrentCanvasMousePosition(e, canvasElem) {
     }
 }
 
-$("#" + "canvasImg1").mousedown(function (e) {
+$("#" + "canvasImg1UI").mousedown(function (e) {
     e.preventDefault();
 
     var canvasElem = $("#" + "canvasImg1")[0];
@@ -517,7 +517,7 @@ $("#" + "canvasImg1").mousedown(function (e) {
     draw()
 });
 
-$("#" + "canvasImg2").mousedown(function (e) {
+$("#" + "canvasImg2UI").mousedown(function (e) {
     e.preventDefault();
 
     var canvasElem = $("#" + "canvasImg2")[0];
@@ -778,6 +778,14 @@ function draw() {
     ctx2.clearRect(0, 0, c2.width, c2.height)
     drawImageWithTransformations(ctx2, g_img, imgw, imgh, scale2, scaleRotation2);
 
+    var cUI = document.getElementById("canvasImg1UI");
+    var ctxUI = cUI.getContext("2d");
+    ctxUI.clearRect(0, 0, c2.width, c2.height)
+
+    var c2UI = document.getElementById("canvasImg2UI");
+    var ctx2UI = c2UI.getContext("2d");
+    ctx2UI.clearRect(0, 0, c2.width, c2.height)
+
     var m_xval = g_globalState.canvasClickLocation.x*imgw;
     var m_yval = g_globalState.canvasClickLocation.y*imgh;
     var m_yval = Math.round(m_yval);
@@ -787,9 +795,9 @@ function draw() {
     var img1HitPoints = getHitPoints(c, ctx.getImageData(0, 0, c.width, c.height).data,
         m_xval, m_yval);
 
-    drawPoint(ctx, {x: m_xval, y: m_yval}, "blue");
+    drawPoint(ctxUI, {x: m_xval, y: m_yval}, "blue");
     for (let i = 0; i < img1HitPoints.length; i++) {
-        drawPoint(ctx, img1HitPoints[i], "red")
+        drawPoint(ctxUI, img1HitPoints[i], "red")
     }
 
     var transformedPoint = getTransformedPoint({x: m_xval, y: m_yval}, scale1,
@@ -800,9 +808,9 @@ function draw() {
         transformedPoint.x, transformedPoint.y);
 
     //FIXME: we can't draw points on the canvas we test
-    drawPoint(ctx2, transformedPoint, "blue");
+    drawPoint(ctx2UI, transformedPoint, "blue");
 
     for (let i = 0; i < img1HitPoints.length; i++) {
-        drawPoint(ctx2, img1HitPoints[i], "red")
+        drawPoint(ctx2UI, img1HitPoints[i], "red")
     }
 }

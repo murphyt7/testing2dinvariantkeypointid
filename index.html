@@ -16,15 +16,31 @@
     <title>Hello, world!</title>
 </head>
 
-<div>
-    <canvas id="canvasImg1" width="200" height="200"></canvas>
-    <canvas id="canvasImg1UI" width="200" height="200"></canvas>
-</div>
+<style>
+    .canvasInline {
+        display: inline-block;
+        float: left;
+        position: absolute;
 
-<div>
-    <canvas id="canvasImg2" width="200" height="200"></canvas>
-    <canvas id="canvasImg2UI" width="200" height="200"></canvas>
+    }
+    .canvasWrapper {
+        display: block;
+        position: relative;
+        width: 202px;
+        height: 202px;
+        float: left;
+    }
+</style>
 
+<div style="position: relative">
+    <div class="canvasWrapper">
+        <canvas id="canvasImg1" class="canvasInline" width="200" height="200"></canvas>
+        <canvas id="canvasImg1UI" class="canvasInline" width="200" height="200"></canvas>
+    </div>
+    <div class="canvasWrapper" width="200" height="200">
+        <canvas id="canvasImg2" class="canvasInline" width="200" height="200"></canvas>
+        <canvas id="canvasImg2UI" class="canvasInline" width="200" height="200"></canvas>
+    </div>
 </div>
 
 
@@ -38,9 +54,6 @@
     }
     .ct-series-b .ct-point{
         stroke: blue !important;
-    }
-    canvas{
-        border: 1px solid black;
     }
 </style>
 <body>
