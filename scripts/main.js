@@ -13,15 +13,17 @@
 */
 
 
-var g_globalState = {
-    canvasClickLocation: {x: 50, y: 50},
+var DELTA_TOTAL = 100;
+var POINT_JUMP_VALUE = 1;
+var DIRECTION_POINT_COUNT = 100;
+var ROTATION_JUMP = 1;
 
+var g_globalState = {
+    canvasClickLocation: {x: .5, y: .5},
 };
 
-var g_p;
-var imgw_base = 100;
-var imgw = 100;
-var imgh = 100;
+var imgw = 200;
+var imgh = 200;
 var imgsrc = "image8-2.jpg";
 var g_img = new Image();
 g_img.src = imgsrc;
@@ -81,6 +83,26 @@ function bilinearInterp(image, xVal, yVal) {
     return inner_bilinear_interp(image[y1][x1], image[y2][x1], image[y1][x2], image[y2][x2], xVal - x1, yVal - y1)
 }
 
+
+function getScaleMatrix(scaleX, scaleY) {
+    return [[scaleX, 0, 0], [0, scaleY, 0], [0, 0, 1]];
+}
+
+function getNormScaleMatrix(scale) {
+    var normX = Math.sqrt(scale);
+    var normY = 1.0 / (Math.sqrt(scale));
+    return [[normX, 0, 0], [0, normY, 0], [0, 0, 1]];
+}
+
+
+function getRotationMatrix(inRotation) {
+    var toRads = inRotation * Math.PI / 180.0;
+    return [
+        [Math.cos(toRads), -Math.sin(toRads), 0],
+        [Math.sin(toRads), Math.cos(toRads), 0],
+        [0, 0, 1]
+    ];
+}
 
 /*
 
@@ -482,10 +504,10 @@ function getCurrentCanvasMousePosition(e, canvasElem) {
     }
 }
 
-$("#" + "canvas").mousedown(function (e) {
+$("#" + "canvasImg1").mousedown(function (e) {
     e.preventDefault();
 
-    var canvasElem = $("#" + "canvas")[0];
+    var canvasElem = $("#" + "canvasImg1")[0];
     const pageMousePosition = getCurrentPageMousePosition(e);
     const canvasMousePosition = getCurrentCanvasMousePosition(e, canvasElem);
     console.log(pageMousePosition);
@@ -494,6 +516,20 @@ $("#" + "canvas").mousedown(function (e) {
     g_globalState.canvasClickLocation = {x: canvasMousePosition.x/imgw, y: canvasMousePosition.y/imgh};
     draw()
 });
+
+$("#" + "canvasImg2").mousedown(function (e) {
+    e.preventDefault();
+
+    var canvasElem = $("#" + "canvasImg2")[0];
+    const pageMousePosition = getCurrentPageMousePosition(e);
+    const canvasMousePosition = getCurrentCanvasMousePosition(e, canvasElem);
+    console.log(pageMousePosition);
+    console.log(canvasMousePosition);
+
+    g_globalState.canvasClickLocation = {x: canvasMousePosition.x/imgw, y: canvasMousePosition.y/imgh};
+    draw()
+});
+
 
 function tomdrawlin() {
     var c = document.getElementById("myCanvas");
@@ -515,13 +551,26 @@ function tomdrawlin() {
 //draw
 
 
-function getPixels(image, width, height, transformationMat) {
+function getPixels(image, width, height, rot, scale, scaleRot) {
     var canvas = document.getElementById('imageMods');
     var ctx = canvas.getContext('2d');
+    ctx.save();
+
     ctx.translate(imgw/2, imgh/2);
-    ctx.rotate(120 * Math.PI / 180);
+    ctx.rotate(scaleRot * Math.PI / 180);
+
+    var normX = Math.sqrt(scale);
+    var normY = 1.0 / (Math.sqrt(scale));
+    ctx.scale(normX, normY);
+
+    ctx.rotate(-scaleRot * Math.PI / 180);
     ctx.translate(-imgw/2, -imgh/2);
-    ctx.drawImage(g_img, 0, 0, imgw, imgh);
+
+    ctx.translate(imgw/2, imgh/2);
+    ctx.rotate(rot * Math.PI / 180);
+    ctx.translate(-imgw/2, -imgh/2);
+    ctx.drawImage(image, 0, 0, imgw, imgh);
+    ctx.restore();
     return ctx.getImageData(0, 0, width, height).data;
 }
 
@@ -545,9 +594,9 @@ function main() {
     draw();
 }
 
-function plotPoints(inputArr, yval, xval, leftVal, rightVal){
+function plotPoints(inputArr, yval, xval) {
     labels = [];
-    zvals = []
+    zvals = [];
     nulllist = [];
     nulllistr = [];
     nulllistl = [];
@@ -566,7 +615,6 @@ function plotPoints(inputArr, yval, xval, leftVal, rightVal){
         labels.push(i+ j);
         zvals.push(inputArr[1][j].z)
     }
-    console.log(xval);
     // Initialize a Line chart in the container with the ID chart1
     new Chartist.Line('#chart1', {
         labels: labels,
@@ -583,7 +631,7 @@ function findRightPointOfAnchor(output) {
     var deltaTotal = 0;
     for (i = 0; i < output.length - 1; i++) {
         deltaTotal += Math.abs( output[i+1].z - output[i].z );
-        if (deltaTotal > 40){
+        if (deltaTotal > DELTA_TOTAL){
             return output[i];
         }
     }
@@ -595,7 +643,7 @@ function getDirectionPointsWithjump(xval, yval, xjump, yjump) {
     var output = [];
     var count = 0;
     while(dx < imgw && dx > 0 && dy < imgh && dy > 0) {
-        if (count > 20) {
+        if (count > DIRECTION_POINT_COUNT) {
             break;
         }
         output.push({x: dx, y: dy});
@@ -615,106 +663,146 @@ function to_matrix_shape(shape) {
 }
 
 function getDirectionPoints(xval, yval, rot) {
-    var jumpH = 8;
+    var jumpH = POINT_JUMP_VALUE;
     var cosval = getCosFromDegrees(rot);
     var sinval = getSinFromDegrees(rot);
-    return [
-        getDirectionPointsWithjump(xval + cosval, yval + sinval, cosval, sinval),
-        getDirectionPointsWithjump(xval, yval, -cosval, -sinval)
-    ]
+    return getDirectionPointsWithjump(
+        xval + cosval, yval + sinval, cosval*jumpH, sinval*jumpH)
 }
 
 function getZValues(image, xval, yval, rot) {
     var points = getDirectionPoints(xval, yval, rot);
-    var rightvals = [];
-    for (var i = 0; i < points[0].length; i++) {
-        rightvals.push( {
-            x: points[0][i].x,
-            y: points[0][i].y,
-            z: bilinearInterp(image, points[0][i].x, points[0][i].y)
+    var ret = [];
+    for (var i = 0; i < points.length; i++) {
+        ret.push( {
+            x: points[i].x,
+            y: points[i].y,
+            z: bilinearInterp(image, points[i].x, points[i].y)
         } );
     }
-    var leftvals = [];
-    for (var i = 0; i < points[1].length; i++) {
-        leftvals.push( {
-            x: points[1][i].x,
-            y: points[1][i].y,
-            z: bilinearInterp(image, points[1][i].x, points[1][i].y)
-        } );
-    }
-    return [rightvals, leftvals]
+    return ret;
 }
 
 function drawPoint(interactiveCanvasContext, point, colour) {
     interactiveCanvasContext.beginPath();
     interactiveCanvasContext.strokeStyle = colour;
-    console.log(point.x + ":" + point.y)
     interactiveCanvasContext.rect(point.x, point.y, 3, 3);
     interactiveCanvasContext.closePath();
     interactiveCanvasContext.stroke();
 }
 
-function plotImagePoints(output, xval, yval, rightVal, leftVal) {
+function plotImagePoints(output, xval, yval) {
 
-    plotPoints( output, yval, xval, leftVal, rightVal )
+    plotPoints( output, yval, xval )
 }
 
-function drawImageWithTransformations(img, imgw, imgh, transformationMat) {
-    var c = document.getElementById("canvas");
-    var ctx = c.getContext("2d");
-    //ctx.clearRect(0, 0, c.width, c.height)
+function drawImageWithTransformations(ctx, img, imgw, imgh, scale, scaleRot) {
 
     ctx.save();
+
     ctx.translate(imgw/2, imgh/2);
-    ctx.rotate(45 * Math.PI / 180);
+    ctx.rotate(scaleRot * Math.PI / 180);
+
+    var normX = Math.sqrt(scale);
+    var normY = 1.0 / (Math.sqrt(scale));
+    ctx.scale(normX, normY);
+
+    ctx.rotate(-scaleRot * Math.PI / 180);
     ctx.translate(-imgw/2, -imgh/2);
-    ctx.translate(200, -200);
+
+    //ctx.translate(imgw/2, imgh/2);
+    //ctx.rotate(45 * Math.PI / 180);
+    //ctx.translate(-imgw/2, -imgh/2);
+    //ctx.translate(200, -200);
     ctx.drawImage(img, 0, 0, imgw, imgh);
     ctx.restore();
 }
 
+function getHitPoints(img, imageData, m_xval, m_yval) {
+
+    var blackandwhite = toBlackAndWhite(imageData);
+    var rot = 0;
+    var shape = [];
+    for (let rot = 0; rot < 360; rot += ROTATION_JUMP) {
+
+        var zvals = getZValues(blackandwhite, m_xval, m_yval, rot);
+        var hitPoint = findRightPointOfAnchor(zvals);
+        if (hitPoint != undefined) {
+            shape.push(hitPoint);
+        }
+
+    }
+    if (shape.length > 3) {
+        console.log(getValuesToNormaliseScale1(to_matrix_shape(shape)));
+    }
+    return shape;
+}
+
+function getTransformationMatrixFromScale(scale, rotation, imgw, imgh) {
+    var mat = getTranslateMatrix(imgw/2, imgh/2);
+    mat = matrixMultiply(mat, getRotationMatrix(rotation));
+    mat = matrixMultiply(mat, getNormScaleMatrix(scale));
+    mat = matrixMultiply(mat, getRotationMatrix(-rotation));
+    mat = matrixMultiply(mat, getTranslateMatrix(-imgw/2, -imgh/2));
+    return mat;
+}
+
+function applyTransformationMatrixToPoint(point, mat) {
+    var resPoint = matrixMultiply( mat, [[point.x], [point.y], [1]]);
+    return { x: resPoint[0][0], y: resPoint[1][0]};
+}
+
+
+function getTransformedPoint(point, undoScale, undoScaleRotation, scale, scaleRotation, imgw, imgh) {
+    var mat = getTransformationMatrixFromScale( undoScale, -undoScaleRotation, imgw, imgh );
+    var mat2 = getTransformationMatrixFromScale( scale, scaleRotation, imgw, imgh );
+    mat = matrixMultiply(mat, mat2);
+    return applyTransformationMatrixToPoint(point, mat);
+}
+
 function draw() {
-    var c = document.getElementById("canvas");
+
+    var scaleRotation1 = 0;
+    var scale1 = 1;
+
+    var scaleRotation2 = 0;
+    var scale2 = 2;
+
+    var c = document.getElementById("canvasImg1");
     var ctx = c.getContext("2d");
     ctx.clearRect(0, 0, c.width, c.height)
-    var d = new Date();
-    var n = d.getTime();
-    var delta =  Math.round(100*(( n % 3000)/3000) );
-    //imgw = imgw_base + delta;
-    var imageData = getPixels(g_img, imgw, imgh);
-    var canvasImgMod = document.getElementById('imageMods');
-    ctx.drawImage(canvasImgMod, 0, 0, imgw, imgh);
-    var blackandwhite = toBlackAndWhite(imageData);
+    drawImageWithTransformations(ctx, g_img, imgw, imgh, scale1, scaleRotation1);
+
+    var c2 = document.getElementById("canvasImg2");
+    var ctx2 = c2.getContext("2d");
+    ctx2.clearRect(0, 0, c2.width, c2.height)
+    drawImageWithTransformations(ctx2, g_img, imgw, imgh, scale2, scaleRotation2);
+
     var m_xval = g_globalState.canvasClickLocation.x*imgw;
     var m_yval = g_globalState.canvasClickLocation.y*imgh;
     var m_yval = Math.round(m_yval);
     var m_xval = Math.round(m_xval);
 
-    var rot = 0;
-    var shape = [];
-    for (let i = 0; i < 180; i += 20) {
-        rot = i;
-        var zvals = getZValues(blackandwhite, m_xval, m_yval, rot);
+    //var imageData = getPixels(img, imgw, imgh, 120, 2.5);
+    var img1HitPoints = getHitPoints(c, ctx.getImageData(0, 0, c.width, c.height).data,
+        m_xval, m_yval);
 
-        var rightVal = findRightPointOfAnchor(zvals[0]);
-        var leftVal = findRightPointOfAnchor(zvals[1]);
-        if (rightVal != undefined) {
-            shape.push(rightVal);
-        }
-        if (leftVal != undefined) {
-            shape.push(leftVal);
-        }
-
-        if (rightVal)
-            drawPoint(ctx, rightVal, "red")
-        if (leftVal)
-            drawPoint(ctx, leftVal, "red")
-
-        drawPoint(ctx, {x: m_xval, y: m_yval}, "blue")
-        plotImagePoints(zvals, m_xval, m_yval, rightVal, leftVal)
+    drawPoint(ctx, {x: m_xval, y: m_yval}, "blue");
+    for (let i = 0; i < img1HitPoints.length; i++) {
+        drawPoint(ctx, img1HitPoints[i], "red")
     }
-    if (shape.length > 3) {
-        console.log(getValuesToNormaliseScale1(to_matrix_shape(shape)));
+
+    var transformedPoint = getTransformedPoint({x: m_xval, y: m_yval}, scale1,
+                    scaleRotation1, scale2, scaleRotation2, imgw, imgh);
+
+    //var imageData = getPixels(img, imgw, imgh, 120, 2.5);
+    var img1HitPoints = getHitPoints(c2, ctx2.getImageData(0, 0, c2.width, c2.height).data,
+        transformedPoint.x, transformedPoint.y);
+
+    //FIXME: we can't draw points on the canvas we test
+    drawPoint(ctx2, transformedPoint, "blue");
+
+    for (let i = 0; i < img1HitPoints.length; i++) {
+        drawPoint(ctx2, img1HitPoints[i], "red")
     }
-    //drawImageWithTransformations(g_img, imgw, imgh, []);
 }
