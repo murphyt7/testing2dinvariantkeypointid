@@ -18,6 +18,12 @@ var POINT_JUMP_VALUE = 1;
 var DIRECTION_POINT_COUNT = 100;
 var ROTATION_JUMP = 1;
 
+var scaleRotation1 = -45;
+var scale1 = 2;
+
+var scaleRotation2 = 90;
+var scale2 = 2;
+
 var g_globalState = {
     canvasClickLocation: {x: .5, y: .5},
 };
@@ -112,7 +118,7 @@ function getRotationMatrix(inRotation) {
 #  #### #    # #    # #    # # #####  # #  #   #      #     # #####   ####  #      #####  # #  #   #
 #     # #####  ###### #    # # #      #  # #   #      #     # #           # #      #      #  # #   #
 #     # #   #  #    # #    # # #      #   ##   #      #     # #      #    # #    # #      #   ##   #
- #####  #    # #    # #####  # ###### #    #   #      ######  ######  ####   ####  ###### #    #   #
+ #####  #    # #    # #####  # ###### #    #   #      ######  ######  ####   ####  ## #### #    #   #
 
 */
 
@@ -759,12 +765,6 @@ function getTransformedPoint(point, undoScale, undoScaleRotation, scale, scaleRo
 
 function draw() {
 
-    var scaleRotation1 = -45;
-    var scale1 = 2;
-
-    var scaleRotation2 = 45;
-    var scale2 = 2;
-
     var c = document.getElementById("canvasImg1");
     var ctx = c.getContext("2d");
     ctx.clearRect(0, 0, c.width, c.height);
@@ -785,6 +785,8 @@ function draw() {
 
     var m_xval = g_globalState.canvasClickLocation.x*imgw;
     var m_yval = g_globalState.canvasClickLocation.y*imgh;
+    var m_xval = 87
+    var m_yval = 126
     var m_yval = Math.round(m_yval);
     var m_xval = Math.round(m_xval);
 
