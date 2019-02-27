@@ -785,8 +785,8 @@ function draw() {
 
     var m_xval = g_globalState.canvasClickLocation.x*imgw;
     var m_yval = g_globalState.canvasClickLocation.y*imgh;
-    var m_xval = 87
-    var m_yval = 126
+    //var m_xval = 87
+    //var m_yval = 126
     var m_yval = Math.round(m_yval);
     var m_xval = Math.round(m_xval);
 
